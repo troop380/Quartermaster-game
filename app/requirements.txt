@@ -1,2 +1,2 @@
-Flask
-pusher
+eventlet
+socketio
