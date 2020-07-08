@@ -52,6 +52,8 @@ def background_thread():
         socketio.emit('my_response',
                       {'data': 'Server generated event', 'count': count},
                       namespace='/test')
+        socketio.emit('logged in as ', {'username': current_user.id})
+        
 
 
 @app.route('/')
