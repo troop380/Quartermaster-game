@@ -46,7 +46,7 @@ def index():
     return render_template('index.html', async_mode=socketio.async_mode)
 
 @app.route('/login')
-def index():
+def session_html():
     return render_template('sessions.html')
 
 
