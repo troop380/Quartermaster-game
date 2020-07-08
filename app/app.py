@@ -23,7 +23,7 @@ thread = None
 thread_lock = Lock()
 
 login = LoginManager(app)
-socketio = SocketIO(app)
+#socketio = SocketIO(app)
 
 @login.user_loader
 def user_loader(id):
