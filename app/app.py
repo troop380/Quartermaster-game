@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 from threading import Lock
 from flask import Flask, render_template, session, request, \
-    copy_current_request_context, jsonify
-from flask_login import LoginManager, UserMixin, current_user, login_user, \
-    logout_user
-from flask_session import Session
+    copy_current_request_context
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 
@@ -13,18 +10,36 @@ from flask_socketio import SocketIO, emit, join_room, leave_room, \
 # the best option based on installed packages.
 async_mode = None
 
+allowed_users = {
+    'foo': 'bar',
+    'python': 'is-great!',
+}
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-app.config['SESSION_TYPE'] = 'filesystem'
-login = LoginManager(app)
-Session(app)
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
 
-class User(UserMixin, object):
-    def __init__(self, id=None):
-        self.id = id
+login = LoginManager(app)
+socketio = SocketIO(app)
+
+@login.user_loader
+def user_loader(id):
+    return User(id)
+
+class User(UserMixin):
+    def __init__(self, username):
+        self.id = username
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form['username']
+    password = request.form['password']
+    if username not in allowed_users or allowed_users[username] != password:
+        abort(401)
+    login_user(User(username))
+    return ''
 
 
 def background_thread():
@@ -37,17 +52,10 @@ def background_thread():
                       {'data': 'Server generated event', 'count': count},
                       namespace='/test')
 
-@login.user_loader
-def load_user(id):
-    return User(id)
 
 @app.route('/')
 def index():
     return render_template('index.html', async_mode=socketio.async_mode)
-
-@app.route('/login')
-def session_html():
-    return render_template('sessions.html')
 
 
 @socketio.on('my_event', namespace='/test')
@@ -122,6 +130,10 @@ def ping_pong():
 
 @socketio.on('connect', namespace='/test')
 def test_connect():
+    if current_user.is_anonymous:
+        return False
+    emit('welcome', {'username': current_user.id})
+    
     global thread
     with thread_lock:
         if thread is None:
@@ -132,47 +144,8 @@ def test_connect():
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     print('Client disconnected', request.sid)
-    
-    
-@app.route('/session', methods=['GET', 'POST'])
-def session_access():
-    if request.method == 'GET':
-        return jsonify({
-            'session': session.get('value', ''),
-            'user': current_user.id
-                if current_user.is_authenticated else 'anonymous'
-        })
-    data = request.get_json()
-    if 'session' in data:
-        session['value'] = data['session']
-    elif 'user' in data:
-        if data['user']:
-            login_user(User(data['user']))
-        else:
-            logout_user()
-    return '', 204
-
-
-@socketio.on('get-session')
-def get_session():
-    emit('refresh-session', {
-        'session': session.get('value', ''),
-        'user': current_user.id
-            if current_user.is_authenticated else 'anonymous'
-    })
-
-
-@socketio.on('set-session')
-def set_session(data):
-    if 'session' in data:
-        session['value'] = data['session']
-    elif 'user' in data:
-        if data['user'] is not None:
-            login_user(User(data['user']))
-        else:
-            logout_user()
-
 
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', debug=False)
+
