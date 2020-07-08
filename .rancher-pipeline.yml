@@ -6,4 +6,7 @@ stages:
       buildContext: .
       tag: troop380 / quartermaster-game
 timeout: 60
+branch:
+  include:
+  - master
 notification: {}
