@@ -131,10 +131,10 @@ def ping_pong():
 
 @socketio.on('connect', namespace='/test')
 def test_connect():
-    if current_user.is_anonymous:
-        print('No User info provided', request.sid)
-        return False
-    emit('welcome', {'username': current_user.id})
+    #if current_user.is_anonymous:
+    #    print('No User info provided', request.sid)
+    #    return False
+    #emit('welcome', {'username': current_user.id})
     
     global thread
     with thread_lock:
