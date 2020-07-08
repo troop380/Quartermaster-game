@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 from threading import Lock
 from flask import Flask, render_template, session, request, \
-    copy_current_request_context
+    copy_current_request_context, jsonify
+from flask_login import LoginManager, UserMixin, current_user, login_user, \
+    logout_user
+from flask_session import Session
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
 
@@ -12,9 +15,16 @@ async_mode = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
+app.config['SESSION_TYPE'] = 'filesystem'
+login = LoginManager(app)
+Session(app)
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
 thread_lock = Lock()
+
+class User(UserMixin, object):
+    def __init__(self, id=None):
+        self.id = id
 
 
 def background_thread():
@@ -27,10 +37,17 @@ def background_thread():
                       {'data': 'Server generated event', 'count': count},
                       namespace='/test')
 
+@login.user_loader
+def load_user(id):
+    return User(id)
 
 @app.route('/')
 def index():
     return render_template('index.html', async_mode=socketio.async_mode)
+
+@app.route('/login')
+def index():
+    return render_template('sessions.html')
 
 
 @socketio.on('my_event', namespace='/test')
@@ -115,6 +132,46 @@ def test_connect():
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     print('Client disconnected', request.sid)
+    
+    
+@app.route('/session', methods=['GET', 'POST'])
+def session_access():
+    if request.method == 'GET':
+        return jsonify({
+            'session': session.get('value', ''),
+            'user': current_user.id
+                if current_user.is_authenticated else 'anonymous'
+        })
+    data = request.get_json()
+    if 'session' in data:
+        session['value'] = data['session']
+    elif 'user' in data:
+        if data['user']:
+            login_user(User(data['user']))
+        else:
+            logout_user()
+    return '', 204
+
+
+@socketio.on('get-session')
+def get_session():
+    emit('refresh-session', {
+        'session': session.get('value', ''),
+        'user': current_user.id
+            if current_user.is_authenticated else 'anonymous'
+    })
+
+
+@socketio.on('set-session')
+def set_session(data):
+    if 'session' in data:
+        session['value'] = data['session']
+    elif 'user' in data:
+        if data['user'] is not None:
+            login_user(User(data['user']))
+        else:
+            logout_user()
+
 
 
 if __name__ == '__main__':
