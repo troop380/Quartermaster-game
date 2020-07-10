@@ -37,3 +37,8 @@ def left(message):
     leave_room(room)
     emit('status', {'msg': session.get('name') + ' has left the room.'}, room=room)
 
+@socketio.on("voted", namespace="/chat")
+def checkVote(message):
+    room = session.get('room')
+    emit("status", {"msg": message["voteChoice"]}, room=room)
+    

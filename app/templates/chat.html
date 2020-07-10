@@ -44,9 +44,21 @@
                     window.location.href = "{{ url_for('main.index') }}";
                 });
             }
+            function clickedVote() {
+              var voteChoices = document.getElementsByName("choose");
+              for (i = 0; i < voteChoices.length; i++) {
+                if (voteChoices[i].checked) {
+                  socket.emit('voted', {"voteChoice": voteChoices[i].id})
+                  console.log(voteChoices[i])
+                  break
+                }
+              }
+            }
+
         </script>
     </head>
     <body>
+      <div>
         <h1>Flask-SocketIO-Chat: {{ room }}</h1>
         <textarea id="chat" cols="80" rows="20" readonly="readonly"></textarea><br><br>
         <input id="text" size="80" placeholder="Enter your message here"><br><br>
@@ -55,6 +67,13 @@
             <thead><td>Who is in the room</td></thead>
             <tbody></tbody>
         </table>
+      </div>
+          
+      <div><br><br><br><br><br>
+        <input id="thing1" name="choose" type="radio"><label>Me</label><br>
+        <input id="thing2" name="choose" type="radio"><label>You</label><br><br>
+        <input id="voted" name="voted" type="button" onclick="clickedVote()" value="Vote">
+      </div>
 
     </body>
 </html>
