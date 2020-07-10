@@ -18,6 +18,15 @@
                     $('#chat').val($('#chat').val() + data.msg + '\n');
                     $('#chat').scrollTop($('#chat')[0].scrollHeight);
                 });
+                
+                // display a user list
+                socket.on('userlist', function(data) {
+                    $('#userlist').find('tbody').empty();
+                    for (const row of data) {
+                        $('#userlist').find('tbody').append('<tr><td>' + row + '</td></tr>');
+                    }
+                });
+
                 $('#text').keypress(function(e) {
                     var code = e.keyCode || e.which;
                     if (code == 13) {
@@ -42,6 +51,10 @@
         <textarea id="chat" cols="80" rows="20" readonly="readonly"></textarea><br><br>
         <input id="text" size="80" placeholder="Enter your message here"><br><br>
         <a href="#" onclick="leave_room();">Leave this room</a>
+        <table id="userlist">
+            <thead><td>Who is in the room</td></thead>
+            <tbody></tbody>
+        </table>
 
     </body>
 </html>
