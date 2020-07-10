@@ -18,6 +18,15 @@
                     $('#chat').val($('#chat').val() + data.msg + '\n');
                     $('#chat').scrollTop($('#chat')[0].scrollHeight);
                 });
+                
+                // display a user list
+                socket.on('userlist', function(data) {
+                    $('#userlist').find('tbody').empty();
+                    for (const row of data) {
+                        $('#userlist').find('tbody').append('<tr><td>' + row + '</td></tr>');
+                    }
+                });
+
                 $('#text').keypress(function(e) {
                     var code = e.keyCode || e.which;
                     if (code == 13) {
@@ -45,22 +54,26 @@
                 }
               }
             }
+
         </script>
     </head>
-    <body style="display:grid;grid-template-columns:600px 60px">
-        <div>
+    <body>
+      <div>
         <h1>Flask-SocketIO-Chat: {{ room }}</h1>
-        <textarea id="chat" cols="80" rows="20"></textarea><br><br>
+        <textarea id="chat" cols="80" rows="20" readonly="readonly"></textarea><br><br>
         <input id="text" size="80" placeholder="Enter your message here"><br><br>
-
         <a href="#" onclick="leave_room();">Leave this room</a>
-        </div>
-
-        <div><br><br><br><br><br>
+        <table id="userlist">
+            <thead><td>Who is in the room</td></thead>
+            <tbody></tbody>
+        </table>
+      </div>
+          
+      <div><br><br><br><br><br>
         <input id="thing1" name="choose" type="radio"><label>Me</label><br>
         <input id="thing2" name="choose" type="radio"><label>You</label><br><br>
         <input id="voted" name="voted" type="button" onclick="clickedVote()" value="Vote">
-        </div>
+      </div>
 
     </body>
 </html>

@@ -1,6 +1,7 @@
 from flask import session
 from flask_socketio import emit, join_room, leave_room
 from .. import socketio
+from .. import rdata
 
 
 @socketio.on('joined', namespace='/chat')
@@ -8,8 +9,16 @@ def joined(message):
     """Sent by clients when they enter a room.
     A status message is broadcast to all people in the room."""
     room = session.get('room')
+    name = session.get('name')
     join_room(room)
-    emit('status', {'msg': session.get('name') + ' has entered the room.'}, room=room)
+    emit('status', {'msg': name + ' has entered the room.'}, room=room)
+    
+    # add the user to the user list in redis
+    key = "room:{}:members".format(room)
+    rdata.hset(key,  name, 1)
+    # send the current user list to all the clients
+    print(rdata.hkeys(key))
+    emit('userlist', rdata.hkeys(key), room=room)
 
 
 @socketio.on('text', namespace='/chat')
@@ -28,8 +37,8 @@ def left(message):
     leave_room(room)
     emit('status', {'msg': session.get('name') + ' has left the room.'}, room=room)
 
-
 @socketio.on("voted", namespace="/chat")
 def checkVote(message):
     room = session.get('room')
     emit("status", {"msg": message["voteChoice"]}, room=room)
+    
