@@ -1,7 +1,7 @@
-from flask import session
+from flask import session, current_app
 from flask_socketio import emit, join_room, leave_room
 from .. import socketio
-from .. import rdata
+from ..models import db, room_members
 
 # expire a room key after X seconds of being idle
 room_idle_max = 1200
@@ -17,10 +17,10 @@ def joined(message):
     join_room(room)
     emit('status', {'msg': name + ' has entered the room.'}, room=room)
     
-    # add the user to the user list in redis
-    room_member_key = "room:{}:members".format(room)
-    rdata.hset(room_member_key,  name, 1)
-    # send the current user list to all the clients
+    # add the user to the user list in sqlite
+    query = room_members(room = room, member = name)
+    db.session.add(query)
+    db.session.commit()
     send_userlist(room)
 
 
@@ -42,12 +42,12 @@ def left(message):
     leave_room(room)
     emit('status', {'msg': name + ' has left the room.'}, room=room)
 
-    # remove the user to the user list in redis
-    # create key to access room member list
-    room_member_key = "room:{}:members".format(room)
-    rdata.hdel(room_member_key, name)
-    # send the current user list to all the clients
+    # remove the user to the user list in sqlite
+    #query = room_members(room = room, member = name)
+    db.session.query(room_members).filter_by(room = room, member = name).delete()
+    db.session.commit()
     send_userlist(room)
+
 
 @socketio.on("voted", namespace="/chat")
 def checkVote(message):
@@ -60,11 +60,15 @@ def update_room_idle(room):
     # create key to access room member list
     room_member_key = "room:{}:members".format(room)
     # use the redis expire call to set the expire time for the room key
-    rdata.expire(room_member_key,room_idle_max)
+#    rdata.expire(room_member_key,room_idle_max)
     # we may need to do something different here, expiring the key removes the data
     # but people could still be in the room
 
 def send_userlist(room):
     # create key to access room member list
-    room_member_key = "room:{}:members".format(room)
-    emit('userlist', rdata.hkeys(room_member_key), room=room)
+    #room_member_key = "select member_name from room_members where room = \"{}\";".format(room)
+    userlisttmp = db.session.query(room_members.member).filter_by(room=room).all()
+    # cleanup the results to display
+    userlist = [value for value, in userlisttmp]
+    print("Userlist - {}".format(userlist))
+    emit('userlist', userlist, room=room)
