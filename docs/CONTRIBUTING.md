@@ -15,9 +15,11 @@ There are a lot of options here
 ##### Atom
 
 ### Setting up development environment
-I like to check out all the project I have into a project folder somewhere in my home directory. If this is the only project you are working on, any directory will do. You will need to clone the github repo. Launch the git-bash program and execute the following, if you will be putting the code in a different directory, make sure to 'cd' to the directory of you choosing before running the git clone.
+I like to check out all the project I have into a project folder somewhere in my home directory. If this is the only project you are working on, any directory will do. You will need to fork the github repo into your own github account. You should see a fork option in the upper right hand corner of the repo on the github site https://github.com/troop380/Quartermaster-game.
+
+Once you have your own fork, you will want to clone a copy to your locak machine for editing. Launch the git-bash program and execute the following, if you will be putting the code in a different directory, make sure to 'cd' to the directory of you choosing before running the git clone.
 ```
-git clone https://github.com/troop380/Quartermaster-game.git
+git clone https://github.com/ Your Name here /Quartermaster-game.git
 ```
 
 You can make edits on you local machine, you will need to install Python as well as the required libraries through pip
