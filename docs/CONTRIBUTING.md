@@ -1,21 +1,62 @@
+## Setting up you development environment
+It you are familiar with how to work with python code, you can skip this section
+
+### Tools to download
+There are various options for a numbe of these, feel free to use a replacement that works for you
+#### Git
+Download the git client for your platform from https://git-scm.com/
+You can accept the prompts during the install, there are a lot of prompts
+#### Pyhton
+Download the latest version of python https://www.python.org/downloads/
+During the install there should be an option to add python to the prompt. This is not required, but will give you more options later.
+#### Editor
+There are a lot of options here
+##### VScode
+##### Atom
+
+### Setting up development environment
+I like to check out all the project I have into a project folder somewhere in my home directory. If this is the only project you are working on, any directory will do. You will need to clone the github repo. Launch the git-bash program and execute the following, if you will be putting the code in a different directory, make sure to 'cd' to the directory of you choosing before running the git clone.
+```
+git clone https://github.com/troop380/Quartermaster-game.git
+```
+
+You can make edits on you local machine, you will need to install Python as well as the required libraries through pip
+```
+pip install -r requirements.txt
+```
+Or, if you did not add python to the path when you installed it, you should be able to run it with the following
+```
+py -3 -m pip install -r requirements.txt
+```
+
+To run the server
+```
+python chat.py
+```
+Or, if you did not add python to the path when you installed it, you should be able to run it with the following
+```
+py -3 chat.py
+```
+
+At this point you should be able to connect to http://localhost:5000 in your local browser. You could connect from other conputers on your local network or from the internet if you setup port redirection on you internet firewall.
+
 ## Rebase your fork after your pull request
 ```
-~/Projects
 $ cd Quartermaster-game/
 
- ~/Projects/Quartermaster-game (master)
+ ~/Quartermaster-game (master)
 $ git remote add upstream https://github.com/troop380/Quartermaster-game.git
 
- ~/Projects/Quartermaster-game (master)
+ ~/Quartermaster-game (master)
 $ git fetch upstream
 From https://github.com/troop380/Quartermaster-game
  * [new branch]      master     -> upstream/master
 
- ~/Projects/Quartermaster-game (master)
+ ~/Quartermaster-game (master)
 $ git rebase upstream/master
 Current branch master is up to date.
 
- ~/Projects/Quartermaster-game (master)
+ ~/Quartermaster-game (master)
 $
 ```
 
