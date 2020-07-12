@@ -1,6 +1,7 @@
 <html>
     <head>
         <title>Flask-SocketIO-Chat: {{ room }}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
         <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
         <script type="text/javascript" charset="utf-8">
@@ -57,23 +58,30 @@
 
         </script>
     </head>
+    <div class="wrapper">
     <body>
-      <div>
+      <div class="grid_title">
         <h1>Flask-SocketIO-Chat: {{ room }}</h1>
+      </div>
+      <div class="grid_chat">
         <textarea id="chat" cols="80" rows="20" readonly="readonly"></textarea><br><br>
         <input id="text" size="80" placeholder="Enter your message here"><br><br>
         <a href="#" onclick="leave_room();">Leave this room</a>
+    </div>
+    <div class="grid_userlist">
         <table id="userlist">
             <thead><td>Who is in the room</td></thead>
             <tbody></tbody>
         </table>
-      </div>
-          
-      <div><br><br><br><br><br>
+    </div>
+
+      <div class=grid_voting><br><br><br><br><br>
         <input id="thing1" name="choose" type="radio"><label>Me</label><br>
         <input id="thing2" name="choose" type="radio"><label>You</label><br><br>
         <input id="voted" name="voted" type="button" onclick="clickedVote()" value="Vote">
       </div>
+      <div class="grid_cats"></div>
 
     </body>
+</div>
 </html>
