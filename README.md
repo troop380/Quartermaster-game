@@ -1,6 +1,8 @@
 # Quartermaster-game
 
 ## Contributing
+For Mor information take a look at https://github.com/troop380/Quartermaster-game/blob/master/docs/CONTRIBUTING.md
+
 To contribute you will need to clone the github repo 
 ```
 git clone https://github.com/troop380/Quartermaster-game.git
