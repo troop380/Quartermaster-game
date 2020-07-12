@@ -10,6 +10,9 @@ def index():
     if form.validate_on_submit():
         session['name'] = form.name.data
         session['room'] = form.room.data
+        # force session timeout set in login
+        # session permaneny needs to be TRUE for the timeout to work
+        session.permanent = True
         return redirect(url_for('.chat'))
     elif request.method == 'GET':
         form.name.data = session.get('name', '')
@@ -26,3 +29,4 @@ def chat():
     if name == '' or room == '':
         return redirect(url_for('.index'))
     return render_template('chat.html', name=name, room=room)
+

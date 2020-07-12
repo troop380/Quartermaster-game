@@ -1,11 +1,15 @@
-from flask import session, current_app
+from flask import session, current_app, request
 from flask_socketio import emit, join_room, leave_room
-from .. import socketio
+from .. import socketio, login_manager
 from ..models import db, room_members
 
 # expire a room key after X seconds of being idle
 room_idle_max = 1200
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 @socketio.on('joined', namespace='/chat')
 def joined(message):
@@ -14,11 +18,15 @@ def joined(message):
     room = session.get('room')
     update_room_idle(room)
     name = session.get('name')
+#    sid = request.cookies.get(app.session_cookie_name)
+    print("Room {} - Name {}".format(room,name))
+    sid = session.sid
+    print("Sessionid {}".format(sid))
     join_room(room)
     emit('status', {'msg': name + ' has entered the room.'}, room=room)
     
     # add the user to the user list in sqlite
-    query = room_members(room = room, member = name)
+    query = room_members(room = room, member_id = sid, member_name = name)
     db.session.add(query)
     db.session.commit()
     send_userlist(room)
@@ -39,12 +47,12 @@ def left(message):
     A status message is broadcast to all people in the room."""
     room = session.get('room')
     name = session.get('name')
+    sid = session.sid
     leave_room(room)
     emit('status', {'msg': name + ' has left the room.'}, room=room)
 
     # remove the user to the user list in sqlite
-    #query = room_members(room = room, member = name)
-    db.session.query(room_members).filter_by(room = room, member = name).delete()
+    db.session.query(room_members).filter_by(room = room, member_id = sid).delete()
     db.session.commit()
     send_userlist(room)
 
@@ -57,18 +65,17 @@ def checkVote(message):
     
 
 def update_room_idle(room):
-    # create key to access room member list
-    room_member_key = "room:{}:members".format(room)
-    # use the redis expire call to set the expire time for the room key
-#    rdata.expire(room_member_key,room_idle_max)
     # we may need to do something different here, expiring the key removes the data
     # but people could still be in the room
+    pass
 
 def send_userlist(room):
-    # create key to access room member list
-    #room_member_key = "select member_name from room_members where room = \"{}\";".format(room)
-    userlisttmp = db.session.query(room_members.member).filter_by(room=room).all()
+    # Get the mamber name from the room_members table filterd by the room
+    userlisttmp = db.session.query(room_members.member_name).filter_by(room=room).all()
     # cleanup the results to display
     userlist = [value for value, in userlisttmp]
     print("Userlist - {}".format(userlist))
     emit('userlist', userlist, room=room)
+
+    # need to compare the sid's in the rooms table with the sids in the session table
+    # and remove any folks from rooms who's sessions have expired
