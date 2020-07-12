@@ -1,0 +1,64 @@
+      body {
+        margin: 40px;
+      }
+      
+          .wrapper {
+              display: grid;
+          grid-gap: 10px;
+              grid-template-columns: repeat(4, [col] ) ;
+              grid-template-rows: repeat(2, [row] auto  );
+              background-color: #fff;
+              color: #444;
+          }
+      
+          .box {
+              background-color: #444;
+              color: #fff;
+              border-radius: 5px;
+              padding: 20px;
+              font-size: 150%;
+      
+          }
+      
+          .box .box {
+              background-color: #ccc;
+              color: #444;
+          }
+      
+          .grid_title {
+              grid-column: col / span 2;
+              grid-row: row;
+          }
+      
+          .grid_status {
+              grid-column: col 3 / span 2;
+              grid-row: row;
+          }
+      
+          .grid_chat {
+              grid-column: col 1/ span 2;
+              grid-row: row 2;
+          }
+      
+          .d{
+              grid-column: col 3 / span 2;
+              grid-row: row 2;
+              display: grid;
+          grid-gap: 10px;
+              grid-template-columns: 1fr 1fr;
+          }
+      
+          .grid_userlist {
+              grid-column: 3;
+              grid-row: 2/3;
+          }
+      
+          .grid_voting {
+              grid-column: 3;
+              grid-row: 1;
+          }
+      
+          .grid_cats {
+              grid-column: 2;
+              grid-row: 2;
+          }
