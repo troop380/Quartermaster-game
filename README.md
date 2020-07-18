@@ -1,6 +1,6 @@
 # Quartermaster-game
 
 ## Contributing
-For more information take a look at https://github.com/troop380/Quartermaster-game/blob/master/docs/CONTRIBUTING.md
+For more information take a look at [CONTRIBITING](blob/master/docs/CONTRIBUTING.md)
 
 
