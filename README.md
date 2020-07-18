@@ -1,6 +1,6 @@
 # Quartermaster-game
 
 ## Contributing
-For more information take a look at [CONTRIBITING](blob/master/docs/CONTRIBUTING.md)
+For more information take a look at [CONTRIBITING](docs/CONTRIBUTING.md)
 
 
