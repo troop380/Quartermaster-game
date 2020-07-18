@@ -22,7 +22,7 @@ Once you have your own fork, you will want to clone a copy to your locak machine
 git clone https://github.com/ Your Name here /Quartermaster-game.git
 ```
 
-You can make edits on you local machine, you will need to install Python as well as the required libraries through pip
+You can make edits on you local machine, you will need to install Python as well as the required libraries through pip. The pip install, or any other python commands, cannot be run from the git shell. Launch a windows command prompt and change to your project directory.
 ```
 pip install -r requirements.txt
 ```
