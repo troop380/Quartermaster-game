@@ -36,6 +36,11 @@
                         socket.emit('text', {msg: text});
                     }
                 });
+
+                // set observer/player button text
+                socket.on('observer_status', function(data) {
+                    $('#observer').val(data);
+                });
             });
             function leave_room() {
                 socket.emit('left', {}, function() {
@@ -44,6 +49,10 @@
                     // go back to the login page
                     window.location.href = "{{ url_for('main.index') }}";
                 });
+            }
+            function clickedObserver() {
+                socket.emit('observer', 'toggle');
+
             }
             function clickedVote() {
               var voteChoices = document.getElementsByName("choose");
@@ -73,6 +82,13 @@
             <thead><td>Who is in the room</td></thead>
             <tbody></tbody>
         </table>
+    </div>
+    <div>
+        <input id="observer" 
+            name="observer" 
+            type="button" 
+            onclick="clickedObserver()" 
+            value="Observer">
     </div>
 
       <div class=grid_voting><br><br><br><br><br>
