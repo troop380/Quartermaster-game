@@ -2,7 +2,6 @@ from flask import session, current_app, request
 from flask_socketio import emit, join_room, leave_room
 from .. import socketio, login_manager
 from ..models import db, room_members
-import datetime
 
 # expire a room key after X seconds of being idle
 room_idle_max = 1200
@@ -25,10 +24,12 @@ def joined(message):
     print("Sessionid {}".format(sid))
     join_room(room)
     emit('status', {'msg': name + ' has entered the room.'}, room=room)
-    emit('message', "Hello @ %s" % (datetime.datetime.now()),room = sid)
+    # Sample message sent to just to the user who logged in
+    emit('message', {'msg': "Hello " + name + " thanks for joining %s" % (request.sid)}, room = request.sid)
+
     
     # add the user to the user list in sqlite
-    query = room_members(room = room, member_id = sid, member_name = name, spectator = True)
+    query = room_members(room = room, member_id = sid, member_name = name, spectator = True, dm_room = request.sid)
     db.session.add(query)
     db.session.commit()
     send_userlist(room)
