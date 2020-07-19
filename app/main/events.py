@@ -27,11 +27,11 @@ def joined(message):
     # Sample message sent to just to the user who logged in
     emit('message', {'msg': "Hello " + name + " thanks for joining %s" % (request.sid)}, room = request.sid)
 
-    
     # add the user to the user list in sqlite
     query = room_members(room = room, member_id = sid, member_name = name, spectator = True, dm_room = request.sid)
     db.session.add(query)
     db.session.commit()
+    #update_observer_status(room,sid)
     send_userlist(room)
 
 
@@ -59,6 +59,41 @@ def left(message):
     db.session.commit()
     send_userlist(room)
 
+@socketio.on("observer", namespace="/chat")
+def checkObserver(message):
+    room = session.get('room')
+    name = session.get('name')
+    sid = session.sid
+    listtmp = db.session.query(room_members.spectator).filter_by(room=room, member_id=sid).all()
+    spec = [value for value, in listtmp]
+    new_spec = None
+    if spec[0] is True:
+        new_spec = False
+    else:
+        new_spec = True
+    print("User {} wants to toggle their observer status from {} to {}".format(name,spec[0],new_spec))
+    db.session.query(room_members).filter_by(room=room, member_id=sid).update({room_members.spectator: new_spec})
+    db.session.commit()
+
+    update_observer_status(room,sid)
+
+def update_observer_status(room, sid):
+    """
+        Send the observer status to the client
+        this is used on inital login
+        and when the user toggles the status
+    """
+    listtmp = db.session.query(room_members).filter_by(room=room, member_id=sid).all()
+    #    select spectator, dm_room from room_members where room = room and member_id = sid
+    print(listtmp)
+    for record in listtmp:
+        Spec = None
+        if record.spectator is True:
+            Spec = "Spectator"
+        else:
+            Spec = "Player"
+    
+        emit('observer_status', Spec, room=record.dm_room)
 
 @socketio.on("voted", namespace="/chat")
 def checkVote(message):
