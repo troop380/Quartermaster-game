@@ -20,7 +20,7 @@ def create_app(debug=False,redishost='localhost'):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_SQLALCHEMY'] = db
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
+#    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
     
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
