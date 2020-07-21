@@ -4,8 +4,10 @@ from .forms import LoginForm
 from flask_login import login_user
 import flask_login
 
+
 class User(flask_login.UserMixin):
     pass
+
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -39,4 +41,3 @@ def chat():
     if name == '' or room == '':
         return redirect(url_for('.index'))
     return render_template('chat.html', name=name, room=room)
-

@@ -3,15 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from flask_session import Session
-import os
-from datetime import timedelta
+# import os
+# from datetime import timedelta
 
 socketio = SocketIO(manage_session=False)
 db = SQLAlchemy()
 login_manager = LoginManager()
 sess = Session()
 
-def create_app(debug=False,redishost='localhost'):
+
+def create_app(debug=False, redishost='localhost'):
     """Create an application."""
     app = Flask(__name__)
     app.debug = debug
@@ -21,10 +22,9 @@ def create_app(debug=False,redishost='localhost'):
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_SQLALCHEMY'] = db
 #    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
-    
+
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)
-
 
     db.init_app(app)
     socketio.init_app(app)
