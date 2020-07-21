@@ -1,15 +1,34 @@
-from flask import session, current_app, request
-from flask_socketio import emit, join_room, leave_room
+import functools
+from flask import session, current_app, request, redirect, url_for
+from flask_login import current_user
+import flask_login
+from flask_socketio import emit, join_room, leave_room, disconnect
 from .. import socketio, login_manager
 from ..models import db, room_members
 
 # expire a room key after X seconds of being idle
 room_idle_max = 1200
 
+class User(flask_login.UserMixin):
+    pass
+
+def authenticated_only(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            print("User {} is not authenticated, disconnecting".format(current_user))
+#            disconnect()
+            room = session.get('room')
+            leave_room(room)
+        else:
+            return f(*args, **kwargs)
+    return wrapped
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    user = User()
+    user.id = user_id
+    return user
 
 @socketio.on('joined', namespace='/chat')
 def joined(message):
@@ -23,6 +42,7 @@ def joined(message):
     sid = session.sid
     print("Sessionid {}".format(sid))
     join_room(room)
+
     emit('status', {'msg': name + ' has entered the room.'}, room=room)
     # Sample message sent to just to the user who logged in
     emit('message', {'msg': "Hello " + name + " thanks for joining %s" % (request.sid)}, room = request.sid)
@@ -34,8 +54,8 @@ def joined(message):
     #update_observer_status(room,sid)
     send_userlist(room)
 
-
 @socketio.on('text', namespace='/chat')
+@authenticated_only
 def text(message):
     """Sent by a client when the user entered a new message.
     The message is sent to all people in the room."""
@@ -43,7 +63,7 @@ def text(message):
     update_room_idle(room)
     emit('message', {'msg': session.get('name') + ':' + message['msg']}, room=room)
 
-
+#@socketio.on('disconnect', namespace='/chat')
 @socketio.on('left', namespace='/chat')
 def left(message):
     """Sent by clients when they leave a room.
@@ -60,6 +80,7 @@ def left(message):
     send_userlist(room)
 
 @socketio.on("observer", namespace="/chat")
+@authenticated_only
 def checkObserver(message):
     room = session.get('room')
     name = session.get('name')
@@ -96,6 +117,7 @@ def update_observer_status(room, sid):
         emit('observer_status', Spec, room=record.dm_room)
 
 @socketio.on("voted", namespace="/chat")
+@authenticated_only
 def checkVote(message):
     room = session.get('room')
     update_room_idle(room)
